@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Classroom</title> <style>
+        :root {
+            --accent: #107C10; 
+            --bg: #010101;
+            --glass: rgba(10, 10, 10, 0.9);
+            --border: rgba(16, 124, 16, 0.4);
+            --glow: 0 0 20px rgba(16, 124, 16, 0.2);
+        }
+
+        body, html {
+            margin: 0; padding: 0; height: 100%;
+            background-color: var(--bg);
+            color: #fff; font-family: 'Consolas', 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        /* MATRIX RAIN BACKGROUND */
+        #matrix {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; opacity: 0.15;
+        }
+
+        /* THE CLOAK (Panic Screen) */
+        #cloak {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 10000;
+        }
+
+        /* MAIN TERMINAL UI */
+        .wrapper {
+            display: grid; grid-template-columns: 320px 1fr; height: 100vh;
+            padding: 20px; box-sizing: border-box; gap: 20px;
+        }
+
+        .sidebar {
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 30px; display: flex; flex-direction: column;
+            box-shadow: var(--glow);
+        }
+
+        .header h1 { font-size: 2.2rem; font-weight: 900; margin: 0; font-style: italic; letter-spacing: -2px; }
+        .tag { font-size: 0.65rem; color: var(--accent); letter-spacing: 3px; font-weight: bold; margin-bottom: 30px; }
+
+        /* SEARCH & PROXY CONTROLS */
+        .box { background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .box select, .box input {
+            width: 100%; background: transparent; border: none; color: #fff; 
+            outline: none; font-family: inherit; font-size: 0.9rem;
+        }
+        .box select { color: var(--accent); cursor: pointer; }
+        .box input { border-bottom: 1px solid var(--accent); margin-top: 10px; padding: 5px 0; }
+
+        /* DASHBOARD GRID */
+        .main {
+            background: var(--glass); backdrop-filter: blur(20px);
+            border: 1px solid var(--border); border-radius: 12px;
+            padding: 40px; overflow-y: auto; position: relative;
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
+
+        .tile {
+            background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+            aspect-ratio: 16/10; border-radius: 8px; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; transition: 0.3s;
+            text-decoration: none; color: #ccc; font-weight: bold; font-size: 0.8rem;
+        }
+        .tile:hover { 
+            background: rgba(16, 124, 16, 0.15); border-color: #fff; 
+            transform: translateY(-5px); box-shadow: var(--glow); color: #fff;
+        }
+
+        /* PROXY WINDOW */
+        #proxy-layer {
+            position: fixed; top: 20px; left: 360px; right: 20px; bottom: 20px;
+            background: #fff; border-radius: 12px; display: none; z-index: 100;
+            overflow: hidden; border: 1px solid var(--border);
+        }
+        .p-nav { background: #111; padding: 10px 20px; display: flex; justify-content: space-between; }
+        iframe { width: 100%; height: 100%; border: none; }
+
+        .footer { margin-top: auto; font-size: 0.65rem; color: #444; border-top: 1px solid #222; padding-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix"></canvas>
+
+    <div id="cloak">
+        <iframe src="https://classroom.google.com" style="width:100%; height:100vh; border:none;"></iframe>
+    </div>
+
+    <div id="proxy-layer">
+        <div class="p-nav">
+            <span style="color:var(--accent); font-size:0.7rem; font-weight:bold;">TUNNEL_ACTIVE</span>
+            <button onclick="kill()" style="background:var(--accent); border:none; color:white; cursor:pointer; padding:2px 10px; border-radius:4px;">TERMINATE</button>
+        </div>
+        <iframe id="ifr"></iframe>
+    </div>
+
+    <div class="wrapper">
+        <aside class="sidebar">
+            <div class="header">
+                <h1>NEBULA.GRID</h1>
+                <div class="tag">SHADOW_GODS // V6.0</div>
+            </div>
+
+            <div class="box">
+                <select id="eng">
+                    <option value="https://google.com/search?q=">GOOGLE_SEARCH</option>
+                    <option value="PROXY">UNBLOCKED_PROXY</option>
+                    <option value="https://duckduckgo.com/?q=">DUCK_PRIVATE</option>
+                </select>
+                <input type="text" id="q" placeholder="ENTER_COMMAND..." onkeydown="exec(event)">
+            </div>
+
+            <div class="tile" style="aspect-ratio:auto; padding:15px; margin-bottom:10px;" onclick="boot('https://roblox.com')">ROBLOX_CORE</div>
+            <div class="tile" style="aspect-ratio:auto; padding:15px;" onclick="boot('https://tiktok.com')">TIKTOK_LIVE</div>
+
+            <div class="footer">
+                OPERATOR: ONLINE<br>
+                PANIC: [ ` ] KEY<br>
+                TAB_CLOAK: ENABLED
+            </div>
+        </aside>
+
+        <main class="main">
+            <div class="tag" style="margin-bottom:20px;">// MODULE_ARRAY</div>
+            <div class="grid" id="g">
+                <div class="tile" onclick="boot('https://netflix.com')">NETFLIX</div>
+                <div class="tile" onclick="boot('https://discord.com')">DISCORD</div>
+                <div class="tile" onclick="boot('https://snapchat.com')">SNAPCHAT</div>
+                <div class="tile" onclick="boot('https://store.steampowered.com')">STEAM</div>
+                <div class="tile" style="border-style:dashed; opacity:0.4;" onclick="add()">+ ADD</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Matrix Logic
+        const c = document.getElementById('matrix'), x = c.getContext('2d');
+        c.width = window.innerWidth; c.height = window.innerHeight;
+        const m = "01ABCDEFGHIJKLMNOPQRSTUVWXYZ", f = 16, col = c.width/f, d = Array(Math.floor(col)).fill(1);
+        function draw() {
+            x.fillStyle = "rgba(0,0,0,0.05)"; x.fillRect(0,0,c.width,c.height);
+            x.fillStyle = "#107C10"; x.font = f+"px monospace";
+            d.forEach((y,i) => {
+                x.fillText(m[Math.floor(Math.random()*m.length)], i*f, y*f);
+                if(y*f > c.height && Math.random() > 0.975) d[i] = 0; d[i]++;
+            });
+        }
+        setInterval(draw, 50);
+
+        // Core Actions
+        function exec(e) {
+            if(e.key === 'Enter') {
+                const en = document.getElementById('eng').value, q = document.getElementById('q').value;
+                if(en === 'PROXY') boot(q); else window.open(en+encodeURIComponent(q), '_blank');
+            }
+        }
+        function boot(u) {
+            if(!u.startsWith('http')) u = 'https://'+u;
+            document.getElementById('ifr').src = "https://www.croxyproxy.com/_proxy/php?url="+encodeURIComponent(u);
+            document.getElementById('proxy-layer').style.display = 'block';
+        }
+        function kill() { document.getElementById('proxy-layer').style.display = 'none'; document.getElementById('ifr').src = ''; }
+        
+        function add() {
+            const n = prompt("Name:"), u = prompt("URL:");
+            if(n && u) {
+                const t = document.createElement('div'); t.className = 'tile';
+                t.onclick = () => boot(u); t.innerHTML = n.toUpperCase();
+                document.getElementById('g').insertBefore(t, document.getElementById('g').lastElementChild);
+            }
+        }
+
+        // Panic Logic
+        document.addEventListener('keydown', e => { if(e.key === '`') { const s = document.getElementById('cloak').style; s.display = s.display === 'block' ? 'none' : 'block'; }});
+        document.addEventListener('visibilitychange', () => { if(document.hidden) document.getElementById('cloak').style.display = 'block'; });
+    </script>
+</body>
+</html>
